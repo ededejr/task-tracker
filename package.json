@@ -49,6 +49,14 @@
       "changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
       "tagAnnotation": "Release v${version}"
     },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}",
+      "autoGenerate": true,
+      "assets": [
+        "build/**/*"
+      ]
+    },
     "npm": {
       "publish": false,
       "publishPath": "build"
