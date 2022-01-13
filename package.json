@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "build:candidate": "tsc -p tsconfig.prod.json",
-    "copy:package-json": "cp package.json build/package.json && cp README.md build/README.md",
+    "copy:package-json": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "jest",
@@ -24,7 +24,7 @@
     "package"
   ],
   "author": "@ededejr",
-  "license": "MIT",
+  "license": "LICENSE",
   "bugs": {
     "url": "https://github.com/ededejr/${npm_package_name}/issues"
   },
