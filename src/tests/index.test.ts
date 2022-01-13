@@ -25,4 +25,13 @@ describe('Task', () => {
 		task.stop();
 		expect(performance.now).toHaveBeenCalledTimes(2);
 	});
+
+	test('start returns Task object', () => {
+		const tracker = new TaskTracker();
+		const task = tracker.start();
+		expect(task).toHaveProperty('stop');
+		expect(task).toHaveProperty('id');
+		expect(typeof task.stop).toBe('function');
+		expect(typeof task.id).toBe('string');
+	});
 });
