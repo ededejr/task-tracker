@@ -35,7 +35,11 @@ stopReadFileTask();
 
 ### Extending to encompass execution
 ```ts
-async function runTask<T extends () => Promise<any>>(f: T, options?: { name: string }): ReturnType<T> {
+interface Options {
+  name: string;
+}
+
+async function runTask(f: () => Promise<any>, options?: Options) {
   const _name = f.name || options?.name;
   log(`start: ${_name}()`);
   const { stop } = tracker.start();
@@ -49,6 +53,6 @@ async function runTask<T extends () => Promise<any>>(f: T, options?: { name: str
   async function fetchData() {
     // make some eternal request
   }
-  await runTask(fetchData);
+  const data = await runTask(fetchData);
 })
 ```
