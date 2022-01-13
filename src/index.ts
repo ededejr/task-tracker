@@ -8,7 +8,7 @@ export default class TaskTracker {
    * Start measuring a task
 	 * @returns A stop function which can be called to stop the task
    */
-  start(): TaskTracker.Task {
+  start(): ITask {
 		const taskId = v4();
 		const now = performance.now();
 		this.map.set(taskId, now);
@@ -32,10 +32,7 @@ export default class TaskTracker {
   	}
   }
 }
-
-export declare namespace TaskTracker {
-	export interface Task {
-		id: string;
-		stop(): number;
-	}
+export interface ITask {
+	id: string;
+	stop(): number;
 }
