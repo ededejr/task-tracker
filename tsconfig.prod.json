@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["ESNext"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./build",
+    "strict": true,
+    "noUnusedLocals": true,
+    // "baseUrl": "./",
+    // "paths": {},
+    // "typeRoots": [],                             /* List of folders to include type definitions from. */
+    // "types": [],                                 /* Type declaration files to be included in compilation. */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["src/**/tests/", "*.test.ts"]
+}
