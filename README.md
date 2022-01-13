@@ -1,20 +1,54 @@
-# <package_name>
-Enter a short description of your package...
+# @ededejr/task-tracker
+A small utility for tracking task execution.
 
-## Developing
+## Usage
 
-### Conventional Commits
+### Creating a tracker
+```ts
+import TaskTracker from '@ededejr/task-tracker';
 
-Commits should use the format `<type>(scope): message`. The default preset is using "angular" conventions.
+const tracker = new TaskTracker();
+```
 
-`<type>` must be one of the following:
+### Tracking a task
+```ts
+const task = tracker.start();
+// do some stuff
+const timeElapsed = task.stop();
+```
 
-* build: Changes that affect the build system or external dependencies (example * scopes: gulp, broccoli, npm)
-* ci: Changes to our CI configuration files and scripts (example scopes: Travis, * Circle, BrowserStack, SauceLabs)
-* docs: Documentation only changes
-* feat: A new feature
-* fix: A bug fix
-* perf: A code change that improves performance
-* refactor: A code change that neither fixes a bug nor adds a feature
-* style: Changes that do not affect the meaning of the code (white-space, * formatting, missing semi-colons, etc)
-* test: Adding missing tests or correcting existing tests
+### Combining with a simple logger
+```ts
+function startTask(name: string) {
+  log(`start: ${name}`);
+  const { stop } = tracker.start();
+  return () => {
+    log(`stop: ${name} ${stop().toPrecision(2)}`);
+  }
+}
+
+// now in use
+const stopReadFileTask = startTask('read file');
+// read the file
+stopReadFileTask();
+```
+
+### Extending to encompass execution
+```ts
+async function runTask<T extends () => Promise<any>>(f: T, options?: { name: string }): ReturnType<T> {
+  const _name = f.name || options?.name;
+  log(`start: ${_name}()`);
+  const { stop } = tracker.start();
+  const result = await f();
+  log(`stop: ${_name} ${stop().toPrecision(2)}`);
+  return result;
+}
+
+// now in use
+(async () => {
+  async function fetchData() {
+    // make some eternal request
+  }
+  await runTask(fetchData);
+})
+```
