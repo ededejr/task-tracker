@@ -10,14 +10,24 @@ import TaskTracker from '@ededejr/task-tracker';
 const tracker = new TaskTracker();
 ```
 
-### Tracking a task
+### Track a task
+The simplest usecase.
+
 ```ts
 const task = tracker.start();
+
 // do some stuff
+
 const timeElapsed = task.stop();
 ```
 
-### Combining with a simple logger
+### Extending use cases
+The `TaskTracker` can be used in combination with other methods to accomplish more functionality.
+
+#### Combine with a logger
+
+Use human readable strings for tasks being run with a logger.
+
 ```ts
 function startTask(name: string) {
   log(`start: ${name}`);
@@ -33,7 +43,10 @@ const stopReadFileTask = startTask('read file');
 stopReadFileTask();
 ```
 
-### Extending to encompass execution
+#### Combine with an executor
+
+Wrap the task measurement in a function that can handle logging, execution, or even retries (if that's your thing).
+
 ```ts
 interface Options {
   name: string;
