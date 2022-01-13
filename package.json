@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "build:candidate": "tsc -p tsconfig.prod.json",
-    "copy:package-json": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
+    "copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "jest",
@@ -65,7 +65,7 @@
         "npm run test",
         "npm run build:candidate"
       ],
-      "after:git:release": "npm run copy:package-json",
+      "after:git:release": "npm run copy:meta",
       "after:release": "npm publish ./build"
     }
   },
