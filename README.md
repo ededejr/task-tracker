@@ -61,6 +61,8 @@ async function processEmails(emails: Email) {
 }
 ```
 
+> The `./examples` folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
+
 
 ## Manually tracking tasks
 In some situations you may want to track a task independent of function execution. This could be business logic that requires a number of different operations before being completed.
