@@ -4,10 +4,10 @@ import { v4 } from 'uuid';
 
 export default class TaskTracker {
   private map: Map<string, number> = new Map();
-	private history: Ledger<string>;
+	private ledger: Ledger<string>;
 
 	constructor(options?: { ledgerSize?: number }) {
-		this.history = new Ledger(options?.ledgerSize);
+		this.ledger = new Ledger(options?.ledgerSize || 50);
 	}
   
   /**
@@ -50,12 +50,12 @@ export default class TaskTracker {
 	 * @param options Configuration options for the execution.
 	 * @returns The task output.
 	 */
-	run<T>(task: TaskFunction<T>, options?: IRunTaskOptions): T {
-		const taskName = options?.name || f.name;
+	async run<T>(task: TaskFunction<T>, options?: IRunTaskOptions): Promise<T> {
+		const taskName = options?.name || task.name;
 		
 		const log = (event: RunTaskEvent, message: string) => {
-			const cb = options?.on[event];
-			options.log && options.log(message);
+			const cb = options?.on && options.on[event];
+			options?.log && options.log(message);
 			cb && cb();
 		};
 
@@ -70,12 +70,12 @@ export default class TaskTracker {
 		// and live in a separate branch
 		this.ledger.push(`[${id}::${taskName}] start`);
 
-		let result: T;
 		let error;
+		let result;
 
 		try {
-			result = await f();
-		} catch (err) {
+			result = await task();
+		} catch (err: any) {
 			error = err;
 			this.ledger.push(`[${id}::${taskName}] error: ${err.name} | ${err.message}`);
 		} finally {
@@ -88,7 +88,7 @@ export default class TaskTracker {
 			throw error;
 		}
 
-		return result;
+		return result as T;
 	}
 
 	get history() {
@@ -127,4 +127,4 @@ interface IRunTaskEventCallbacks {
 	end?: () => void,
 }
 
-type RunTaskEvent = Keys<IRunTaskEventCallbacks>;
+type RunTaskEvent = keyof IRunTaskEventCallbacks;
