@@ -9,9 +9,10 @@ export default class TaskTracker {
 	 * @returns A stop function which can be called to stop the task
    */
   start(): ITask {
-		const taskId = v4();
+		const taskId = this.createId();
 		const now = performance.now();
 		this.map.set(taskId, now);
+
 		return {
 			id: taskId,
 			stop: () => (this.stop(taskId) as number),
@@ -31,7 +32,12 @@ export default class TaskTracker {
   		return now - startTime;
   	}
   }
+
+	private createId() {
+		return v4();
+	}
 }
+
 export interface ITask {
 	id: string;
 	stop(): number;
