@@ -3,11 +3,13 @@ import Ledger from './ledger';
 import { v4 } from 'uuid';
 
 export default class TaskTracker {
+	private name?: string;
   private map: Map<string, number> = new Map();
 	private $ledger: Ledger<string>;
 	private isLedgerEnabled: boolean;
 
 	constructor(options?: ITaskRunnerOptions) {
+		this.name = options?.name;
 		this.isLedgerEnabled = options?.isLedgerEnabled ?? true;
 		this.$ledger = new Ledger(options?.ledgerSize || 50);
 		
@@ -81,7 +83,7 @@ export default class TaskTracker {
 		// reason: I just did this to see what kinds of problems
 		// could arise. Maybe this should stay an internal research ground,
 		// and live in a separate branch
-		this.record(`[${id}::${taskName || 'unknown'}] start`);
+		this.record(id , 'start', taskName);
 
 		let error;
 		let result;
@@ -90,11 +92,11 @@ export default class TaskTracker {
 			result = await task();
 		} catch (err: any) {
 			error = err;
-			this.record(`[${id}::${taskName || 'unknown'}] error: ${err.name} | ${err.message}`);
+			this.record(id, `error: ${err.name} | ${err.message}`, taskName);
 		} finally {
 			const duration = stop();
 			log('end', `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
-			this.record(`[${id}::${taskName || 'unknown'}] stop: ${duration}ms`);
+			this.record(id, `stop: ${duration}ms`, taskName);
 		}
 
 		if (error) {
@@ -104,13 +106,41 @@ export default class TaskTracker {
 		return result as T;
 	}
 
-	private record(message: string) {
-		this.isLedgerEnabled && this.$ledger.push(message);
+	private record(id: string, message: string, taskName?: string) {
+		this.isLedgerEnabled && this.$ledger.push(`[${this.formatTask(id, taskName)}] ${message}`);
+	}
+
+	private formatTask(id: string, taskName?: string) {
+		return `<${this.name ? `${this.name}>` : ''}${id}::${taskName || 'unknown'}`;
 	}
 
 	private createId() {
 		return v4();
 	}
+}
+
+export interface ITaskRunnerOptions {
+	/**
+	 * Providing a name to a TaskRunner instance will include the 
+	 * name in every ledger entry. This is useful for debugging
+	 * within specific domains.
+	 * 
+	 * Sample: [<{name}>{task-id}::{task-name}]
+	 */
+	name?: string,
+	/**
+	 * Disable using the ledger.
+	 */
+	isLedgerEnabled?: boolean,
+	/**
+	 * The size of the ledger. This determines the limit of entries
+	 * before memory is reclaimed.
+	 */
+	ledgerSize?: number,
+	/**
+	 * A function which receives the ledger entries being deleted.
+	 */
+	persistLedger?: (entries: string[]) => void,
 }
 
 export interface ITask {
@@ -141,9 +171,3 @@ interface IRunTaskEventCallbacks {
 }
 
 type RunTaskEvent = keyof IRunTaskEventCallbacks;
-
-export interface ITaskRunnerOptions { 
-	isLedgerEnabled?: boolean,
-	ledgerSize?: number,
-	persistLedger?: (entries: string[]) => void,
-}

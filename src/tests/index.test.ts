@@ -152,4 +152,11 @@ describe('Task with Ledger', () => {
 		expect(tracker.ledger.length).toBe(0);
 		expect(cb).toHaveBeenCalledTimes(0);
 	});
+
+	test('name is included in ledger', async () => {
+		const tracker = new TaskTracker({ ledgerSize: 10, name: 'Monolith' });
+		const testTask = () => new Promise(resolve => setTimeout(resolve, 100));
+		await tracker.run(testTask);
+		expect(tracker.ledger[0]).toContain('<Monolith>');
+	});
 });
