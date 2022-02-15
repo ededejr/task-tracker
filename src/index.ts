@@ -4,10 +4,23 @@ import { v4 } from 'uuid';
 
 export default class TaskTracker {
   private map: Map<string, number> = new Map();
-	private ledger: Ledger<string>;
+	private $ledger: Ledger<string>;
+	private isLedgerEnabled: boolean;
 
-	constructor(options?: { historySize?: number }) {
-		this.ledger = new Ledger(options?.historySize || 50);
+	constructor(options?: ITaskRunnerOptions) {
+		this.isLedgerEnabled = options?.isLedgerEnabled ?? true;
+		this.$ledger = new Ledger(options?.ledgerSize || 50);
+		
+		if (options?.persistLedger) {
+			this.$ledger.onReclaim(options.persistLedger);
+		}
+	}
+
+	/**
+	 * A history of tasks performed by this instance.
+	 */
+	get ledger() {
+		return this.$ledger.getHistory();
 	}
   
   /**
@@ -68,7 +81,7 @@ export default class TaskTracker {
 		// reason: I just did this to see what kinds of problems
 		// could arise. Maybe this should stay an internal research ground,
 		// and live in a separate branch
-		this.ledger.push(`[${id}::${taskName || 'unknown'}] start`);
+		this.record(`[${id}::${taskName || 'unknown'}] start`);
 
 		let error;
 		let result;
@@ -77,11 +90,11 @@ export default class TaskTracker {
 			result = await task();
 		} catch (err: any) {
 			error = err;
-			this.ledger.push(`[${id}::${taskName || 'unknown'}] error: ${err.name} | ${err.message}`);
+			this.record(`[${id}::${taskName || 'unknown'}] error: ${err.name} | ${err.message}`);
 		} finally {
 			const duration = stop();
 			log('end', `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
-			this.ledger.push(`[${id}::${taskName || 'unknown'}] stop: ${duration}ms`);
+			this.record(`[${id}::${taskName || 'unknown'}] stop: ${duration}ms`);
 		}
 
 		if (error) {
@@ -91,8 +104,8 @@ export default class TaskTracker {
 		return result as T;
 	}
 
-	get history() {
-		return this.ledger.getHistory();
+	private record(message: string) {
+		this.isLedgerEnabled &&this.$ledger.push(message);
 	}
 
 	private createId() {
@@ -128,3 +141,9 @@ interface IRunTaskEventCallbacks {
 }
 
 type RunTaskEvent = keyof IRunTaskEventCallbacks;
+
+export interface ITaskRunnerOptions { 
+	isLedgerEnabled?: boolean,
+	ledgerSize?: number,
+	persistLedger?: (ledger: string[]) => void,
+}
