@@ -1,5 +1,5 @@
 import { performance } from 'perf_hooks';
-import Ledger from './ledger';
+import Ledger, { LedgerRecord } from './ledger';
 import { v4 } from 'uuid';
 
 export default class TaskTracker {
@@ -140,7 +140,7 @@ export interface ITaskRunnerOptions {
 	/**
 	 * A function which receives the ledger entries being deleted.
 	 */
-	persistLedger?: (entries: string[]) => void,
+	persistLedger?: (entries: LedgerRecord<string>[]) => void,
 }
 
 export interface ITask {

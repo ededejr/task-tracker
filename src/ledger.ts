@@ -1,14 +1,14 @@
 /**
  * An Array wrapper which only supports write operations.
  */
-export default class Ledger<T> {
-	private history: T[] = [];
+export default class Ledger<T = string> {
+	private index: number = 0;
+	private limit: number = 100;
+	private history: LedgerRecord<T>[] = [];
 	private listeners: ILedgerListeners<T> = {
 		push: [],
 		reclaim: [],
 	};
-
-	limit: number = 100;
 
 	constructor(limit?: number) {
 		if (limit) {
@@ -20,7 +20,7 @@ export default class Ledger<T> {
 	 * Retrieve the current history, optionally transforming the output.
 	 * @param transform An optional transform function for each history item.
 	 */
-	getHistory<RT = T>(transform?: (item: T, index?: number) => RT): RT[] | T[] {
+	getHistory<RT = T>(transform?: (item: LedgerRecord<T>, index?: number) => RT): RT[] | LedgerRecord<T>[] {
 		return transform ? this.history.map(transform) : this.history;
 	}
 
@@ -29,7 +29,12 @@ export default class Ledger<T> {
 	 * @param items The items to be inserted. 
 	 */
 	push(...items: T[]) {
-		this.history.push(...items);
+		this.history.push(...items.map(item => ({
+			data: item,
+			index: this.index++,
+			timestamp: Date.now(),
+		})));
+
 		this.listeners.push.forEach(cb => {
 			for (const item of items) {
 				cb(item);
@@ -56,7 +61,7 @@ export default class Ledger<T> {
 	 * Add a callback to be called when items are removed from the history.
 	 * @param cb The callback to be called.
 	 */
-	onReclaim(cb: (items: T[]) => void) {
+	onReclaim(cb: (items: LedgerRecord<T>[]) => void) {
 		this.listeners.reclaim.push(cb);
 	}
 
@@ -65,7 +70,13 @@ export default class Ledger<T> {
 	}
 }
 
+export type LedgerRecord<T> = {
+	index: number,
+	timestamp: number,
+	data: T
+}
+
 interface ILedgerListeners<T> {
 	push: ((item: T, index?: number) => void)[];
-	reclaim: ((items: T[]) => void)[];
+	reclaim: ((items: LedgerRecord<T>[]) => void)[];
 }
