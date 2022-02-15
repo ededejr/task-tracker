@@ -105,7 +105,7 @@ export default class TaskTracker {
 	}
 
 	private record(message: string) {
-		this.isLedgerEnabled &&this.$ledger.push(message);
+		this.isLedgerEnabled && this.$ledger.push(message);
 	}
 
 	private createId() {
@@ -145,5 +145,5 @@ type RunTaskEvent = keyof IRunTaskEventCallbacks;
 export interface ITaskRunnerOptions { 
 	isLedgerEnabled?: boolean,
 	ledgerSize?: number,
-	persistLedger?: (ledger: string[]) => void,
+	persistLedger?: (entries: string[]) => void,
 }

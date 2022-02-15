@@ -1,34 +1,88 @@
 # @ededejr/task-tracker
 A small utility for tracking task execution.
 
-## Usage
+## Installation
+This is hosted using Github packages, which means you may have to include an `.npmrc` file.
 
-### Creating a tracker
+In your `.npmrc` file include the following:
+```
+@ededejr:registry=https://npm.pkg.github.com/ededejr
+```
+
+Afterwards, you can now install using `npm`:
+```
+npm install @ededejr/task-runner
+```
+
+# Usage
+
+## Using `TaskRunner.run`
+The `run` method is the easiest and most consistent way to get started using the `TaskRunner`. It handles a bunch of functionality around running tasks, and utilizes best practices while providing an accessible API.
+
+Let's take a look at a basic example, which will run your task and print out some logs to the console:
+
 ```ts
 import TaskTracker from '@ededejr/task-tracker';
 
 const tracker = new TaskTracker();
+
+async function downloadEmails() {
+  const emails = tracker.run(
+    async () => await EmailService.downloadEmails(),
+    {
+      log: (message: string) => console.log(message)
+    }
+  );
+}
 ```
 
-### Track a task
-The simplest usecase.
+Using the `run` method also keeps a ledger of all tasks run, which can be useful for tracing. This ledger can be accessed with the `TaskRunner.ledger` property. In real world use cases it may be more practical to consume the ledger when memory is being reclaimed. The `Ledger` stores records in memory until a limit is reached. When the limit is reached, the ledger reclaims more space.
+
+The following is an example which allows persisting the ledger when reclaimed:
+
+```ts
+import TaskTracker from '@ededejr/task-tracker';
+
+const tracker = new TaskTracker();
+
+async function processEmails(emails: Email) {
+  for (const email of emails) {
+    tracker.run(
+      async () => await EmailService.process(email),
+      {
+        log: (message: string) => console.log(message),
+        ledgerSize: 3, // Persist every 3 entries
+        persistLedger: (entries: string[]) => {
+          // publish to remote source, or save to disk...
+        }
+      }
+    );
+  }
+}
+```
+
+
+## Manually tracking tasks
+In some situations you may want to track a task independent of function execution. This could be business logic that requires a number of different operations before being completed.
+
+This is intentionally left open-ended to allow consumers decide what works best for their use case.
 
 ```ts
 const task = tracker.start();
-
-// do some stuff
-
-const timeElapsed = task.stop();
+// some stuff later...
+const duration = task.stop();
 ```
 
-### Extending use cases
-The `TaskTracker` can be used in combination with other methods to accomplish more functionality.
+> Important: Ensure the `stop` function is called for your tasks to prevent memory build up.
 
-#### Combine with a logger
-
-Use human readable strings for tasks being run with a logger.
+The `TaskTracker` can be also be used in combination with other methods to accomplish more functionality. A good example of this is including a logger:
 
 ```ts
+import TaskTracker from '@ededejr/task-tracker';
+
+const tracker = new TaskTracker();
+
+// Use human readable strings for tasks being run with a logger.
 function startTask(name: string) {
   log(`start: ${name}`);
   const { stop } = tracker.start();
@@ -39,33 +93,6 @@ function startTask(name: string) {
 
 // now in use
 const stopReadFileTask = startTask('read file');
-// read the file
+// read the file...
 stopReadFileTask();
-```
-
-#### Combine with an executor
-
-Wrap the task measurement in a function that can handle logging, execution, or even retries (if that's your thing).
-
-```ts
-interface Options {
-  name: string;
-}
-
-async function runTask(f: () => Promise<any>, options?: Options) {
-  const _name = f.name || options?.name;
-  log(`start: ${_name}()`);
-  const { stop } = tracker.start();
-  const result = await f();
-  log(`stop: ${_name} ${stop().toPrecision(2)}`);
-  return result;
-}
-
-// now in use
-(async () => {
-  async function fetchData() {
-    // make some eternal request
-  }
-  const data = await runTask(fetchData);
-})
 ```
