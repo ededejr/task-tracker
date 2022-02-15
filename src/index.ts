@@ -1,34 +1,14 @@
 import { performance } from 'perf_hooks';
+import Ledger from './ledger';
 import { v4 } from 'uuid';
-
-class Ledger<T> {
-	private history: T[] = [];
-	limit: number = 100;
-
-	constructor(limit: number) {
-		this.limit = number;
-	}
-
-	getHistory(transform?: <RT>(item: T, index?: number) => RT) {
-		return transform ? this.history.map(transform) : this.history;
-	}
-
-	push(...items: T[]) {
-		this.history.push(items);
-		
-		if (this.history.length >= this.limit) {
-			this.history.splice(0, this.deletionCount)
-		}
-	}
-
-	private get deletionCount() {
-		return Math.floor(this.history.length/2);
-	}
-}
 
 export default class TaskTracker {
   private map: Map<string, number> = new Map();
-	private history: Ledger<string> = new Ledger();
+	private history: Ledger<string>;
+
+	constructor(options?: { ledgerSize?: number }) {
+		this.history = new Ledger(options?.ledgerSize);
+	}
   
   /**
    * Start measuring a task
@@ -139,7 +119,7 @@ export interface IRunTaskOptions {
 	/**
 	 * Perform callbacks on given events
 	 */
-	on?: IRunTaskEvents
+	on?: IRunTaskEventCallbacks
 }
 
 interface IRunTaskEventCallbacks {
