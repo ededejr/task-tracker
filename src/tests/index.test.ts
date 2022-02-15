@@ -84,10 +84,10 @@ describe('Task with Ledger', () => {
 	});
 
 	test('reclaims memory after specified history size', async () => {
-		const historySize = 20;
-		const iterations = historySize + 2;
+		const ledgerSize = 20;
+		const iterations = ledgerSize + 2;
 		
-		const tracker = new TaskTracker({ ledgerSize: historySize });
+		const tracker = new TaskTracker({ ledgerSize });
 		jest.spyOn(tracker, 'start');
 		jest.spyOn(tracker, 'stop');
 	
@@ -100,5 +100,56 @@ describe('Task with Ledger', () => {
 		expect(tracker.start).toHaveBeenCalledTimes(iterations);
 		expect(tracker.stop).toHaveBeenCalledTimes(iterations);
 		expect(tracker.ledger.length).toBe(14);
+	});
+
+	test('calls persistLedger when reclaiming', async () => {
+		const ledgerSize = 20;
+		const iterations = ledgerSize + 2;
+		const cb = jest.fn();
+		
+		const tracker = new TaskTracker({ 
+			ledgerSize, 
+			persistLedger: cb 
+		});
+
+		jest.spyOn(tracker, 'start');
+		jest.spyOn(tracker, 'stop');
+	
+		const testTask = () => new Promise(resolve => setTimeout(resolve, 50));
+		
+		for (let index = 0; index < iterations; index++) {
+			await tracker.run(testTask);
+		}
+
+		expect(tracker.start).toHaveBeenCalledTimes(iterations);
+		expect(tracker.stop).toHaveBeenCalledTimes(iterations);
+		expect(tracker.ledger.length).toBe(14);
+		expect(cb).toHaveBeenCalledTimes(3);
+	});
+
+	test('does not write to ledger if isLedgerEnabled', async () => {
+		const ledgerSize = 20;
+		const iterations = ledgerSize + 2;
+		const cb = jest.fn();
+		
+		const tracker = new TaskTracker({ 
+			ledgerSize, 
+			isLedgerEnabled: false,
+			persistLedger: cb
+		});
+
+		jest.spyOn(tracker, 'start');
+		jest.spyOn(tracker, 'stop');
+	
+		const testTask = () => new Promise(resolve => setTimeout(resolve, 50));
+		
+		for (let index = 0; index < iterations; index++) {
+			await tracker.run(testTask);
+		}
+
+		expect(tracker.start).toHaveBeenCalledTimes(iterations);
+		expect(tracker.stop).toHaveBeenCalledTimes(iterations);
+		expect(tracker.ledger.length).toBe(0);
+		expect(cb).toHaveBeenCalledTimes(0);
 	});
 });
