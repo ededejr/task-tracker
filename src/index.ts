@@ -6,8 +6,8 @@ export default class TaskTracker {
   private map: Map<string, number> = new Map();
 	private ledger: Ledger<string>;
 
-	constructor(options?: { ledgerSize?: number }) {
-		this.ledger = new Ledger(options?.ledgerSize || 50);
+	constructor(options?: { historySize?: number }) {
+		this.ledger = new Ledger(options?.historySize || 50);
 	}
   
   /**
@@ -68,7 +68,7 @@ export default class TaskTracker {
 		// reason: I just did this to see what kinds of problems
 		// could arise. Maybe this should stay an internal research ground,
 		// and live in a separate branch
-		this.ledger.push(`[${id}::${taskName}] start`);
+		this.ledger.push(`[${id}::${taskName || 'unknown'}] start`);
 
 		let error;
 		let result;
@@ -77,11 +77,11 @@ export default class TaskTracker {
 			result = await task();
 		} catch (err: any) {
 			error = err;
-			this.ledger.push(`[${id}::${taskName}] error: ${err.name} | ${err.message}`);
+			this.ledger.push(`[${id}::${taskName || 'unknown'}] error: ${err.name} | ${err.message}`);
 		} finally {
 			const duration = stop();
-			log('end', `stop: "${taskName}" ${duration.toPrecision(2)}`);
-			this.ledger.push(`[${id}::${taskName}] stop: ${duration}`);
+			log('end', `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
+			this.ledger.push(`[${id}::${taskName || 'unknown'}] stop: ${duration}ms`);
 		}
 
 		if (error) {
