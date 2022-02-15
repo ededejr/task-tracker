@@ -1,8 +1,34 @@
 import { performance } from 'perf_hooks';
 import { v4 } from 'uuid';
 
+class Ledger<T> {
+	private history: T[] = [];
+	limit: number = 100;
+
+	constructor(limit: number) {
+		this.limit = number;
+	}
+
+	getHistory(transform?: <RT>(item: T, index?: number) => RT) {
+		return transform ? this.history.map(transform) : this.history;
+	}
+
+	push(...items: T[]) {
+		this.history.push(items);
+		
+		if (this.history.length >= this.limit) {
+			this.history.splice(0, this.deletionCount)
+		}
+	}
+
+	private get deletionCount() {
+		return Math.floor(this.history.length/2);
+	}
+}
+
 export default class TaskTracker {
   private map: Map<string, number> = new Map();
+	private history: Ledger<string> = new Ledger();
   
   /**
    * Start measuring a task
@@ -33,6 +59,62 @@ export default class TaskTracker {
   	}
   }
 
+	/**
+	 * Run and track a task during it's execution. 
+	 * 
+	 * Using this function will also keep a history of tasks
+	 * that have been run by this `TaskRunner` instance. The
+	 * history can be retrieved using the `history` property.
+	 * 
+	 * @param task The task you wish to execute and track.
+	 * @param options Configuration options for the execution.
+	 * @returns The task output.
+	 */
+	run<T>(task: TaskFunction<T>, options?: IRunTaskOptions): T {
+		const taskName = options?.name || f.name;
+		
+		const log = (event: RunTaskEvent, message: string) => {
+			const cb = options?.on[event];
+			options.log && options.log(message);
+			cb && cb();
+		};
+
+		const { id, stop } = this.start();
+		log('start', `start: "${taskName}"`);
+		// Although I can move the ledger functions to the start and stop
+		// functions respectively, I'm leaving them here
+		// so that they only trace tasks using the "run" command
+		//
+		// reason: I just did this to see what kinds of problems
+		// could arise. Maybe this should stay an internal research ground,
+		// and live in a separate branch
+		this.ledger.push(`[${id}::${taskName}] start`);
+
+		let result: T;
+		let error;
+
+		try {
+			result = await f();
+		} catch (err) {
+			error = err;
+			this.ledger.push(`[${id}::${taskName}] error: ${err.name} | ${err.message}`);
+		} finally {
+			const duration = stop();
+			log('end', `stop: "${taskName}" ${duration.toPrecision(2)}`);
+			this.ledger.push(`[${id}::${taskName}] stop: ${duration}`);
+		}
+
+		if (error) {
+			throw error;
+		}
+
+		return result;
+	}
+
+	get history() {
+		return this.ledger.getHistory();
+	}
+
 	private createId() {
 		return v4();
 	}
@@ -42,3 +124,27 @@ export interface ITask {
 	id: string;
 	stop(): number;
 }
+
+export type TaskFunction<T = unknown> = () => Promise<T> | T;
+
+export interface IRunTaskOptions {
+	/**
+	 * A human readable task name. This will try to default to the function name
+	 */
+	name?: string,
+	/**
+	 * An optional logging function called to trace events 
+	 */
+	log?: (m: string) => void,
+	/**
+	 * Perform callbacks on given events
+	 */
+	on?: IRunTaskEvents
+}
+
+interface IRunTaskEventCallbacks {
+	start?: () => void,
+	end?: () => void,
+}
+
+type RunTaskEvent = Keys<IRunTaskEventCallbacks>;
