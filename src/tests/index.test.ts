@@ -38,18 +38,18 @@ describe('Task', () => {
 
 describe('Task with Ledger', () => {
 	test('writes to ledger after "run()"', async () => {
-		const tracker = new TaskTracker({ historySize: 10 });
+		const tracker = new TaskTracker({ ledgerSize: 10 });
 		jest.spyOn(tracker, 'start');
 		jest.spyOn(tracker, 'stop');
 		const testTask = () => new Promise(resolve => setTimeout(resolve, 100));
 		await tracker.run(testTask);
 		expect(tracker.start).toHaveBeenCalledTimes(1);
 		expect(tracker.stop).toHaveBeenCalledTimes(1);
-		expect(tracker.history.length).toBe(2);
+		expect(tracker.ledger.length).toBe(2);
 	});
 
 	test('errors bubble up to caller', async () => {
-		const tracker = new TaskTracker({ historySize: 10 });
+		const tracker = new TaskTracker({ ledgerSize: 10 });
 		const testTask = () => new Promise((_,reject) => reject(new Error('test error')));
 		let err: Error | undefined;
 		
@@ -65,7 +65,7 @@ describe('Task with Ledger', () => {
 	});
 
 	test('writes to ledger on errors', async () => {
-		const tracker = new TaskTracker({ historySize: 10 });
+		const tracker = new TaskTracker({ ledgerSize: 10 });
 		jest.spyOn(tracker, 'start');
 		jest.spyOn(tracker, 'stop');
 		const testTask = () => new Promise((_, reject) => setTimeout(() => {
@@ -80,14 +80,14 @@ describe('Task with Ledger', () => {
 
 		expect(tracker.start).toHaveBeenCalledTimes(1);
 		expect(tracker.stop).toHaveBeenCalledTimes(1);
-		expect(tracker.history.length).toBe(3);
+		expect(tracker.ledger.length).toBe(3);
 	});
 
 	test('reclaims memory after specified history size', async () => {
 		const historySize = 20;
 		const iterations = historySize + 2;
 		
-		const tracker = new TaskTracker({ historySize });
+		const tracker = new TaskTracker({ ledgerSize: historySize });
 		jest.spyOn(tracker, 'start');
 		jest.spyOn(tracker, 'stop');
 	
@@ -99,6 +99,6 @@ describe('Task with Ledger', () => {
 
 		expect(tracker.start).toHaveBeenCalledTimes(iterations);
 		expect(tracker.stop).toHaveBeenCalledTimes(iterations);
-		expect(tracker.history.length).toBe(14);
+		expect(tracker.ledger.length).toBe(14);
 	});
 });
