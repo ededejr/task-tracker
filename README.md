@@ -52,8 +52,11 @@ async function processEmails(emails: Email) {
       {
         log: (message: string) => console.log(message),
         ledgerSize: 3, // Persist every 3 entries
-        persistLedger: (entries: string[]) => {
+        persistLedger: (entries) => {
           // publish to remote source, or save to disk...
+          for (const entry of entires) {
+            appendToFile(JSON.stringify(entry))
+          }
         }
       }
     );
