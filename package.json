@@ -1,86 +1,78 @@
 {
-  "name": "@ededejr/task-tracker",
-  "version": "0.0.0",
-  "description": "A small utility for tracking task execution",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "build:candidate": "tsc -p tsconfig.prod.json",
-    "copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "release": "release-it",
-    "release:minor": "release-it --ci --minor",
-    "release:major": "release-it --ci --major"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ededejr/${npm_package_name}.git"
-  },
-  "keywords": [
-    "npm",
-    "package"
-  ],
-  "author": "@ededejr",
-  "license": "LICENSE",
-  "bugs": {
-    "url": "https://github.com/ededejr/${npm_package_name}/issues"
-  },
-  "homepage": "https://github.com/ededejr/${npm_package_name}#readme",
-  "devDependencies": {
-    "@release-it/conventional-changelog": "^3.0.1",
-    "@types/jest": "^26.0.23",
-    "@types/node": "^17.0.8",
-    "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^4.28.0",
-    "@typescript-eslint/parser": "^4.28.0",
-    "eslint": "^7.29.0",
-    "jest": "^27.0.5",
-    "release-it": "^14.10.0",
-    "ts-jest": "^27.0.3",
-    "typescript": "^4.5.4"
-  },
-  "release-it": {
-    "git": {
-      "commit": true,
-      "commitMessage": "chore(release): release v${version}",
-      "changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
-      "tagAnnotation": "Release v${version}"
-    },
-    "github": {
-      "release": true,
-      "releaseName": "v${version}",
-      "autoGenerate": true,
-      "assets": [
-        "build/**/*"
-      ]
-    },
-    "npm": {
-      "publish": false,
-      "publishPath": "build"
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "angular",
-        "infile": "CHANGELOG.md"
-      }
-    },
-    "hooks": {
-      "before:init": [
-        "npm run lint",
-        "npm run test",
-        "npm run build:candidate"
-      ],
-      "after:git:release": "npm run copy:meta",
-      "after:release": "npm publish ./build"
-    }
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
-  "dependencies": {
-    "uuid": "^8.3.2"
-  }
+	"name": "@ededejr/task-tracker",
+	"version": "0.0.0",
+	"description": "A small utility for tracking task execution",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc",
+		"build:candidate": "tsc -p tsconfig.prod.json",
+		"copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"release": "release-it",
+		"release:minor": "release-it --ci --minor",
+		"release:major": "release-it --ci --major"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ededejr/${npm_package_name}.git"
+	},
+	"keywords": [
+		"npm",
+		"package"
+	],
+	"author": "@ededejr",
+	"license": "LICENSE",
+	"bugs": {
+		"url": "https://github.com/ededejr/${npm_package_name}/issues"
+	},
+	"homepage": "https://github.com/ededejr/${npm_package_name}#readme",
+	"devDependencies": {
+		"@release-it/conventional-changelog": "^3.0.1",
+		"@types/jest": "^26.0.23",
+		"@types/node": "^17.0.8",
+		"@types/uuid": "^8.3.4",
+		"@typescript-eslint/eslint-plugin": "^4.28.0",
+		"@typescript-eslint/parser": "^4.28.0",
+		"eslint": "^7.29.0",
+		"jest": "^27.0.5",
+		"release-it": "^14.10.0",
+		"ts-jest": "^27.0.3",
+		"typescript": "^4.5.4"
+	},
+	"release-it": {
+		"git": {
+			"commit": true,
+			"commitMessage": "chore(release): release v${version}",
+			"changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
+			"tagAnnotation": "Release v${version}"
+		},
+		"npm": {
+			"publish": false,
+			"publishPath": "build"
+		},
+		"plugins": {
+			"@release-it/conventional-changelog": {
+				"preset": "angular",
+				"infile": "CHANGELOG.md"
+			}
+		},
+		"hooks": {
+			"before:init": [
+				"npm run lint",
+				"npm run test",
+				"npm run build:candidate"
+			],
+			"after:git:release": "npm run copy:meta",
+			"after:release": "npm publish ./build"
+		}
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
+	"dependencies": {
+		"uuid": "^8.3.2"
+	}
 }
