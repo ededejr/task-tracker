@@ -99,7 +99,7 @@ export default class TaskTracker {
 			this.record(id, `error: ${err.name} | ${err.message}`, taskName);
 		} finally {
 			const duration = stop();
-			log("end", `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
+			log("stop", `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
 			this.record(id, `stop: ${duration}ms`, taskName);
 		}
 
@@ -178,7 +178,7 @@ export interface IRunTaskOptions {
 
 interface IRunTaskEventCallbacks {
 	start?: () => void;
-	end?: () => void;
+	stop?: () => void;
 }
 
 type RunTaskEvent = keyof IRunTaskEventCallbacks;
