@@ -16,7 +16,7 @@ npm install @ededejr/task-runner
 
 # Usage
 
-## Using `TaskRunner.run`
+## `TaskRunner.run`
 The `run` method is the easiest and most consistent way to get started using the `TaskRunner`. It handles a bunch of functionality around running tasks, and utilizes best practices while providing an accessible API.
 
 Let's take a look at a basic example, which will run your task and print out some logs to the console:
@@ -88,7 +88,7 @@ async function processEmails(emails: Email) {
 ```
 
 
-> The `./examples` folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
+> The [examples](https://github.com/ededejr/task-tracker/tree/feat/task-runner-ledger/examples) folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
 
 
 ## Manually tracking tasks
