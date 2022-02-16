@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["src/**/tests/", "*.test.ts"]
+  "exclude": ["src/**/tests/", "*.test.ts", "examples/"],
 }
