@@ -1,38 +1,39 @@
 // Disabling typescript for example file since this is just for presentation.
 // @ts-nocheck
+import { appendFile } from 'fs/promises';
+import randomatic from 'randomatic';
 import TaskTracker from '@ededejr/task-tracker';
 
-const log = (m: string) => console.log(m);
+const onInsertFile = './onInsert-log.txt';
+const onReclaimFile = './onReclaim-log.txt';
 
-const RendererTaskRunner = new TaskTracker({ 
-  name: 'Renderer', 
-  ledgerSize: 1,
-  persistLedger: (entries) => entries.forEach(e => log(JSON.stringify(e)))
-});
+async function write(type: 'insert' | 'reclaim', entry: any) {
+  const data = JSON.stringify(entry);
+  console.log(data);
+  await appendFile(type === 'insert' ? onInsertFile : onReclaimFile, data + '\n');
+}
 
-const ReportingSvcTaskRunner = new TaskTracker({ 
-  name: 'ReportingSvc',
-  ledgerSize: 1,
-  persistLedger: (entries) => entries.forEach(e => JSON.stringify(e))
-});
-
-const DataSvcTaskRunner = new TaskTracker({ 
-  name: 'DataSvc',
-  ledgerSize: 1,
-  persistLedger: (entries) => entries.forEach(e => JSON.stringify(e))
-});
-
-function randomExecution() {
-  const duration = Math.floor(Math.max(Math.random() * 10000, 500));
-  return new Promise(resolve => setTimeout(resolve, duration));
+function createTaskRunner(name: string) {
+  return new TaskTracker({ 
+    name, 
+    ledgerSize: 1,
+    persist: (entry) => write('insert', entry),
+    persistLedger: (entries) => entries.forEach(entry => write('reclaim', entry)),
+  });
 }
 
 function task(tracker: TaskTracker) {
-  return new Promise(resolve => {
+  return new Promise(async (resolve) => {
     let count = 100;
 
     while (count) {
-      tracker.run(randomExecution);
+      await tracker.run(
+        () => {
+          const duration = Math.floor(Math.max(Math.random() * 10000, 500));
+          return new Promise(resolve => setTimeout(resolve, duration));
+        }, 
+        { name: randomatic('A0', 7) }
+      );
       count--;
     }
 
@@ -42,8 +43,8 @@ function task(tracker: TaskTracker) {
 
 (async () => {
   await Promise.all([
-    task(RendererTaskRunner),
-    task(ReportingSvcTaskRunner),
-    task(DataSvcTaskRunner)
+    task(createTaskRunner('Renderer')),
+    task(createTaskRunner('ReportingSvc')),
+    task(createTaskRunner('DataSvc'))
   ]);
 })();
