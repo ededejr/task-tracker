@@ -11,7 +11,7 @@
 		"lint:fix": "eslint --fix",
 		"test": "jest",
 		"test:watch": "jest --watch",
-		"release": "release-it",
+		"release": "release-it --ci",
 		"release:minor": "release-it --ci --minor",
 		"release:major": "release-it --ci --major"
 	},
