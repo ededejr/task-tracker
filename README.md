@@ -40,7 +40,7 @@ async function downloadEmails() {
 
 #### Tracing
 
-Using the `run` method optionally (enabled by default) keeps a history of all events, which can be useful for tracing. This history can be accessed with the `TaskRunner.history` property. In real world use cases it may be more practical to consume the history before items are deleted from memory. This process of deletion is called "reclaiming", and memory is reclaimed when the `maxHistorySize` is reached.
+Using the `run` method keeps a history of all events, which can be useful for tracing (this can be disabled). This history can be accessed with the `TaskRunner.history` property. In real world use cases it may be more practical to consume the history before items are deleted from memory. This process of deletion is called "reclaiming", and memory is reclaimed when the `maxHistorySize` is reached.
 
 The following is an example which allows persisting the history on reclaim:
 
