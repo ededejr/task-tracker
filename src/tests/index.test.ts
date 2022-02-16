@@ -46,18 +46,18 @@ describe("TaskTracker", () => {
 
 	describe("run", () => {
 		test('writes to ledger after "run()"', async () => {
-			const tracker = new TaskTracker({ ledgerSize: 10 });
+			const tracker = new TaskTracker({ maxHistorySize: 10 });
 			jest.spyOn(tracker, "start");
 			jest.spyOn(tracker, "stop");
 			const testTask = () => new Promise((resolve) => setTimeout(resolve, 100));
 			await tracker.run(testTask);
 			expect(tracker.start).toHaveBeenCalledTimes(1);
 			expect(tracker.stop).toHaveBeenCalledTimes(1);
-			expect(tracker.ledger.length).toBe(2);
+			expect(tracker.history.length).toBe(2);
 		});
 
 		test("errors bubble up to caller", async () => {
-			const tracker = new TaskTracker({ ledgerSize: 10 });
+			const tracker = new TaskTracker({ maxHistorySize: 10 });
 			const testTask = () =>
 				new Promise((_, reject) => reject(new Error("test error")));
 			let err: Error | undefined;
@@ -76,7 +76,7 @@ describe("TaskTracker", () => {
 
 	describe("ledger", () => {
 		test("writes to ledger on errors", async () => {
-			const tracker = new TaskTracker({ ledgerSize: 10 });
+			const tracker = new TaskTracker({ maxHistorySize: 10 });
 			jest.spyOn(tracker, "start");
 			jest.spyOn(tracker, "stop");
 			const testTask = () =>
@@ -94,14 +94,14 @@ describe("TaskTracker", () => {
 
 			expect(tracker.start).toHaveBeenCalledTimes(1);
 			expect(tracker.stop).toHaveBeenCalledTimes(1);
-			expect(tracker.ledger.length).toBe(3);
+			expect(tracker.history.length).toBe(3);
 		});
 
 		test("reclaims memory after specified history size", async () => {
 			const ledgerSize = 20;
 			const iterations = ledgerSize + 2;
 
-			const tracker = new TaskTracker({ ledgerSize });
+			const tracker = new TaskTracker({ maxHistorySize: ledgerSize });
 			jest.spyOn(tracker, "start");
 			jest.spyOn(tracker, "stop");
 
@@ -113,7 +113,7 @@ describe("TaskTracker", () => {
 
 			expect(tracker.start).toHaveBeenCalledTimes(iterations);
 			expect(tracker.stop).toHaveBeenCalledTimes(iterations);
-			expect(tracker.ledger.length).toBe(14);
+			expect(tracker.history.length).toBe(14);
 		});
 
 		test("calls persistLedger when reclaiming", async () => {
@@ -122,8 +122,8 @@ describe("TaskTracker", () => {
 			const cb = jest.fn();
 
 			const tracker = new TaskTracker({
-				ledgerSize,
-				persistLedger: cb,
+				maxHistorySize: ledgerSize,
+				persistHistory: cb,
 			});
 
 			jest.spyOn(tracker, "start");
@@ -137,7 +137,7 @@ describe("TaskTracker", () => {
 
 			expect(tracker.start).toHaveBeenCalledTimes(iterations);
 			expect(tracker.stop).toHaveBeenCalledTimes(iterations);
-			expect(tracker.ledger.length).toBe(14);
+			expect(tracker.history.length).toBe(14);
 			expect(cb).toHaveBeenCalledTimes(3);
 		});
 
@@ -147,9 +147,9 @@ describe("TaskTracker", () => {
 			const cb = jest.fn();
 
 			const tracker = new TaskTracker({
-				ledgerSize,
-				isLedgerEnabled: false,
-				persistLedger: cb,
+				maxHistorySize: ledgerSize,
+				isHistoryEnabled: false,
+				persistHistory: cb,
 			});
 
 			jest.spyOn(tracker, "start");
@@ -163,22 +163,22 @@ describe("TaskTracker", () => {
 
 			expect(tracker.start).toHaveBeenCalledTimes(iterations);
 			expect(tracker.stop).toHaveBeenCalledTimes(iterations);
-			expect(tracker.ledger.length).toBe(0);
+			expect(tracker.history.length).toBe(0);
 			expect(cb).toHaveBeenCalledTimes(0);
 		});
 
 		test("name is included in ledger entry", async () => {
-			const tracker = new TaskTracker({ ledgerSize: 10, name: "Monolith" });
+			const tracker = new TaskTracker({ maxHistorySize: 10, name: "Monolith" });
 			const testTask = () => new Promise((resolve) => setTimeout(resolve, 100));
 			await tracker.run(testTask);
-			expect(JSON.stringify(tracker.ledger[0])).toContain("<Monolith>");
+			expect(JSON.stringify(tracker.history[0])).toContain("<Monolith>");
 		});
 
 		test("entry includes metadata", async () => {
-			const tracker = new TaskTracker({ ledgerSize: 10, name: "Monolith" });
+			const tracker = new TaskTracker({ maxHistorySize: 10, name: "Monolith" });
 			const testTask = () => new Promise((resolve) => setTimeout(resolve, 100));
 			await tracker.run(testTask);
-			const entry = tracker.ledger[0];
+			const entry = tracker.history[0];
 			expect(entry).toHaveProperty("index");
 			expect(entry).toHaveProperty("timestamp");
 			expect(entry).toHaveProperty("data");

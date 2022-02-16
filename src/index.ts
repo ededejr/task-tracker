@@ -3,30 +3,31 @@ import Ledger, { LedgerRecord } from "./ledger";
 import { v4 } from "uuid";
 
 export default class TaskTracker {
-	private name?: string;
 	private map: Map<string, number> = new Map();
-	private $ledger: Ledger<string>;
-	private isLedgerEnabled: boolean;
+	private ledger: Ledger<string>;
+	private isHistoryEnabled: boolean;
+	private name?: string;
+	private log?: ITaskRunnerOptions["log"];
 
 	constructor(options?: ITaskRunnerOptions) {
 		this.name = options?.name;
-		this.isLedgerEnabled = options?.isLedgerEnabled ?? true;
-		this.$ledger = new Ledger(options?.ledgerSize || 50);
+		this.isHistoryEnabled = options?.isHistoryEnabled ?? true;
+		this.ledger = new Ledger(options?.maxHistorySize || 50);
 
-		if (options?.persist) {
-			this.$ledger.onInsert(options.persist);
+		if (options?.persistEntry) {
+			this.ledger.onInsert(options.persistEntry);
 		}
 
-		if (options?.persistLedger) {
-			this.$ledger.onReclaim(options.persistLedger);
+		if (options?.persistHistory) {
+			this.ledger.onReclaim(options.persistHistory);
 		}
 	}
 
 	/**
 	 * A history of tasks performed by this instance.
 	 */
-	get ledger() {
-		return this.$ledger.getHistory();
+	get history() {
+		return this.ledger.getHistory();
 	}
 
 	/**
@@ -72,21 +73,12 @@ export default class TaskTracker {
 	async run<T>(task: TaskFunction<T>, options?: IRunTaskOptions): Promise<T> {
 		const taskName = options?.name || task.name;
 
-		const log = (event: RunTaskEvent, message: string) => {
-			const cb = options?.on && options.on[event];
-			options?.log && options.log(message);
-			cb && cb();
+		const log = (message: string) => {
+			this.log && this.log(message);
 		};
 
 		const { id, stop } = this.start();
-		log("start", `start: "${taskName}"`);
-		// Although I can move the ledger functions to the start and stop
-		// functions respectively, I'm leaving them here
-		// so that they only trace tasks using the "run" command
-		//
-		// reason: I just did this to see what kinds of problems
-		// could arise. Maybe this should stay an internal research ground,
-		// and live in a separate branch
+		log(`start: "${taskName}"`);
 		this.record(id, "start", taskName);
 
 		let error;
@@ -99,7 +91,7 @@ export default class TaskTracker {
 			this.record(id, `error: ${err.name} | ${err.message}`, taskName);
 		} finally {
 			const duration = stop();
-			log("stop", `stop: "${taskName}" ${duration.toPrecision(2)}ms`);
+			log(`stop: "${taskName}" ${duration.toPrecision(2)}ms`);
 			this.record(id, `stop: ${duration}ms`, taskName);
 		}
 
@@ -111,8 +103,8 @@ export default class TaskTracker {
 	}
 
 	private record(id: string, message: string, taskName?: string) {
-		this.isLedgerEnabled &&
-			this.$ledger.push(`[${this.formatTask(id, taskName)}] ${message}`);
+		this.isHistoryEnabled &&
+			this.ledger.push(`[${this.formatTask(id, taskName)}] ${message}`);
 	}
 
 	private formatTask(id: string, taskName?: string) {
@@ -138,20 +130,24 @@ export interface ITaskRunnerOptions {
 	/**
 	 * Disable using the ledger.
 	 */
-	isLedgerEnabled?: boolean;
+	isHistoryEnabled?: boolean;
 	/**
-	 * The size of the ledger. This determines the limit of entries
+	 * The size of the TaskRunner's history. This determines the limit of entries
 	 * before memory is reclaimed.
 	 */
-	ledgerSize?: number;
+	maxHistorySize?: number;
 	/**
 	 * A function which receives the latest ledger entry.
 	 */
-	persist?: (entry: LedgerRecord<string>) => void;
+	persistEntry?: (entry: LedgerRecord<string>) => void;
 	/**
 	 * A function which receives the ledger entries being deleted.
 	 */
-	persistLedger?: (entries: LedgerRecord<string>[]) => void;
+	persistHistory?: (entries: LedgerRecord<string>[]) => void;
+	/**
+	 * An optional logging function called to trace events
+	 */
+	log?: (message: string) => void;
 }
 
 export interface ITask {
@@ -166,19 +162,4 @@ export interface IRunTaskOptions {
 	 * A human readable task name. This will try to default to the function name
 	 */
 	name?: string;
-	/**
-	 * An optional logging function called to trace events
-	 */
-	log?: (m: string) => void;
-	/**
-	 * Perform callbacks on given events
-	 */
-	on?: IRunTaskEventCallbacks;
 }
-
-interface IRunTaskEventCallbacks {
-	start?: () => void;
-	stop?: () => void;
-}
-
-type RunTaskEvent = keyof IRunTaskEventCallbacks;

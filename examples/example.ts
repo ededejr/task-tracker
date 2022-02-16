@@ -19,9 +19,9 @@ async function write(type: "insert" | "reclaim", entry: any) {
 function createTaskRunner(name: string) {
 	return new TaskTracker({
 		name,
-		ledgerSize: 10,
-		persist: (entry) => write("insert", entry),
-		persistLedger: (entries) =>
+		maxHistorySize: 10,
+		persistEntry: (entry) => write("insert", entry),
+		persistHistory: (entries) =>
 			entries.forEach((entry) => write("reclaim", entry)),
 	});
 }
