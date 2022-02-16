@@ -20,32 +20,36 @@ export default class Ledger<T = string> {
 	 * Retrieve the current history, optionally transforming the output.
 	 * @param transform An optional transform function for each history item.
 	 */
-	getHistory<RT = T>(transform?: (item: LedgerRecord<T>, index?: number) => RT): RT[] | LedgerRecord<T>[] {
+	getHistory<RT = T>(
+		transform?: (item: LedgerRecord<T>, index?: number) => RT
+	): RT[] | LedgerRecord<T>[] {
 		return transform ? this.history.map(transform) : this.history;
 	}
 
 	/**
 	 * Insert items into the history.
-	 * @param items The items to be inserted. 
+	 * @param items The items to be inserted.
 	 */
 	push(...items: T[]) {
-		this.history.push(...items.map(item => {
-			const record = {
-				data: item,
-				index: this.index++,
-				timestamp: Date.now(),
-			};
+		this.history.push(
+			...items.map((item) => {
+				const record = {
+					data: item,
+					index: this.index++,
+					timestamp: Date.now(),
+				};
 
-			this.listeners.push.forEach(cb => {
-				cb(record);
-			});
+				this.listeners.push.forEach((cb) => {
+					cb(record);
+				});
 
-			return record;
-		}));
+				return record;
+			})
+		);
 
 		if (this.history.length >= this.limit) {
 			const deletedItems = this.history.splice(0, this.deletionCount);
-			this.listeners.reclaim.forEach(cb => {
+			this.listeners.reclaim.forEach((cb) => {
 				cb(deletedItems);
 			});
 		}
@@ -68,15 +72,15 @@ export default class Ledger<T = string> {
 	}
 
 	private get deletionCount() {
-		return Math.floor(this.history.length/2);
+		return Math.floor(this.history.length / 2);
 	}
 }
 
 export type LedgerRecord<T> = {
-	index: number,
-	timestamp: number,
-	data: T
-}
+	index: number;
+	timestamp: number;
+	data: T;
+};
 
 interface ILedgerListeners<T> {
 	push: ((item: LedgerRecord<T>) => void)[];
