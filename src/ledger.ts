@@ -29,17 +29,19 @@ export default class Ledger<T = string> {
 	 * @param items The items to be inserted. 
 	 */
 	push(...items: T[]) {
-		this.history.push(...items.map(item => ({
-			data: item,
-			index: this.index++,
-			timestamp: Date.now(),
-		})));
+		this.history.push(...items.map(item => {
+			const record = {
+				data: item,
+				index: this.index++,
+				timestamp: Date.now(),
+			};
 
-		this.listeners.push.forEach(cb => {
-			for (const item of items) {
-				cb(item);
-			}
-		});
+			this.listeners.push.forEach(cb => {
+				cb(record);
+			});
+
+			return record;
+		}));
 
 		if (this.history.length >= this.limit) {
 			const deletedItems = this.history.splice(0, this.deletionCount);
@@ -53,7 +55,7 @@ export default class Ledger<T = string> {
 	 * Add a callback to be called when an item is added to the history.
 	 * @param cb The callback to be called.
 	 */
-	onInsert(cb: (item: T, index?: number) => void) {
+	onInsert(cb: (item: LedgerRecord<T>) => void) {
 		this.listeners.push.push(cb);
 	}
 
@@ -77,6 +79,6 @@ export type LedgerRecord<T> = {
 }
 
 interface ILedgerListeners<T> {
-	push: ((item: T, index?: number) => void)[];
+	push: ((item: LedgerRecord<T>) => void)[];
 	reclaim: ((items: LedgerRecord<T>[]) => void)[];
 }

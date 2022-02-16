@@ -12,6 +12,10 @@ export default class TaskTracker {
 		this.name = options?.name;
 		this.isLedgerEnabled = options?.isLedgerEnabled ?? true;
 		this.$ledger = new Ledger(options?.ledgerSize || 50);
+
+		if (options?.persist) {
+			this.$ledger.onInsert(options.persist);
+		}
 		
 		if (options?.persistLedger) {
 			this.$ledger.onReclaim(options.persistLedger);
@@ -137,6 +141,10 @@ export interface ITaskRunnerOptions {
 	 * before memory is reclaimed.
 	 */
 	ledgerSize?: number,
+	/**
+	 * A function which receives the latest ledger entry.
+	 */
+	 persist?: (entry: LedgerRecord<string>) => void,
 	/**
 	 * A function which receives the ledger entries being deleted.
 	 */

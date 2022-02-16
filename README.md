@@ -64,6 +64,30 @@ async function processEmails(emails: Email) {
 }
 ```
 
+Persisting is also possible on insertion:
+
+```ts
+import TaskTracker from '@ededejr/task-tracker';
+
+const tracker = new TaskTracker();
+
+async function processEmails(emails: Email) {
+  for (const email of emails) {
+    tracker.run(
+      async () => await EmailService.process(email),
+      {
+        log: (message: string) => console.log(message),
+        ledgerSize: 100, // The size of the ledger before being reclaimed
+        persist: (entry) => {
+          // publish to remote source, or save to disk...
+        }
+      }
+    );
+  }
+}
+```
+
+
 > The `./examples` folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
 
 
