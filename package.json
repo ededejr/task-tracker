@@ -17,7 +17,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/ededejr/${npm_package_name}.git"
+		"url": "git+https://github.com/ededejr/task-tracker.git"
 	},
 	"keywords": [
 		"npm",
@@ -26,9 +26,9 @@
 	"author": "@ededejr",
 	"license": "LICENSE",
 	"bugs": {
-		"url": "https://github.com/ededejr/${npm_package_name}/issues"
+		"url": "https://github.com/ededejr/task-tracker/issues"
 	},
-	"homepage": "https://github.com/ededejr/${npm_package_name}#readme",
+	"homepage": "https://github.com/ededejr/task-tracker#readme",
 	"devDependencies": {
 		"@release-it/conventional-changelog": "^3.0.1",
 		"@types/jest": "^26.0.23",
