@@ -1,3 +1,10 @@
+## [0.1.1](https://github.com/ededejr/task-tracker/compare/0.1.0...0.1.1) (2022-05-17)
+
+
+### Bug Fixes
+
+* update constructor to account for log ([ab0469f](https://github.com/ededejr/task-tracker/commit/ab0469f0c08ee449e2ac9821c8aef2d00be20c8c))
+
 # 0.1.0 (2022-02-16)
 
 

@@ -1,6 +1,6 @@
 {
 	"name": "@ededejr/task-tracker",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A small utility for tracking task execution",
 	"main": "index.js",
 	"scripts": {
