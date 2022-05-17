@@ -13,6 +13,7 @@ export default class TaskTracker {
 		this.name = options?.name;
 		this.isHistoryEnabled = options?.isHistoryEnabled ?? true;
 		this.ledger = new Ledger(options?.maxHistorySize || 50);
+		this.log = options?.log;
 
 		if (options?.persistEntry) {
 			this.ledger.onInsert(options.persistEntry);
