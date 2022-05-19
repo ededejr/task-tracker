@@ -20,7 +20,7 @@ npm install @ededejr/task-runner
 
 ## Usage
 
-### `TaskRunner.run`
+### `TaskTracker.run`
 
 The `run` method is the easiest and most consistent way to get started using the `TaskRunner`. It handles a bunch of functionality around running tasks, and utilizes best practices while providing an accessible API.
 
