@@ -34,7 +34,7 @@ const tracker = new TaskTracker({
 });
 
 async function downloadEmails() {
-  const emails = tracker.run(async () => await EmailService.downloadEmails());
+  return tracker.run(async () => await EmailService.downloadEmails());
 }
 ```
 
@@ -98,11 +98,11 @@ These logs can also include the name of the `TaskRunner` if supplied:
 import TaskTracker from "@ededejr/task-tracker";
 
 const tracker = new TaskTracker({
-  name: 'DataSvc'
-	maxHistorySize: 100,
-	persistEntry: (entry) => {
-		appendToFile(JSON.stringify(entry));
-	},
+  name: "DataSvc",
+  maxHistorySize: 100,
+  persistEntry: (entry) => {
+    appendToFile(JSON.stringify(entry));
+  },
 });
 ```
 
