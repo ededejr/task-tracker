@@ -30,11 +30,11 @@ Let's take a look at a basic example, which will run your task and print out som
 import TaskTracker from "@ededejr/task-tracker";
 
 const tracker = new TaskTracker({
-	log: (message: string) => console.log(message),
+  log: (message: string) => console.log(message),
 });
 
 async function downloadEmails() {
-	const emails = tracker.run(async () => await EmailService.downloadEmails());
+  const emails = tracker.run(async () => await EmailService.downloadEmails());
 }
 ```
 
@@ -48,18 +48,18 @@ The following is an example which allows persisting the history on reclaim:
 import TaskTracker from "@ededejr/task-tracker";
 
 const tracker = new TaskTracker({
-	maxHistorySize: 3, // Persist every 3 entries
-	persistHistory: (entries) => {
-		for (const entry of entires) {
-			appendToFile(JSON.stringify(entry));
-		}
-	},
+  maxHistorySize: 3, // Persist every 3 entries
+  persistHistory: (entries) => {
+    for (const entry of entires) {
+      appendToFile(JSON.stringify(entry));
+    }
+  },
 });
 
 async function processEmails(emails: Email) {
-	for (const email of emails) {
-		tracker.run(async () => await EmailService.process(email));
-	}
+  for (const email of emails) {
+    tracker.run(async () => await EmailService.process(email));
+  }
 }
 ```
 
@@ -69,19 +69,19 @@ Persisting is also possible on insertion:
 import TaskTracker from "@ededejr/task-tracker";
 
 const tracker = new TaskTracker({
-	maxHistorySize: 100, // The size of the ledger before being reclaimed
-	persistEntry: (entry) => {
-		// publish to remote source, or save to disk...
-		appendToFile(JSON.stringify(entry));
-	},
+  maxHistorySize: 100, // The size of the ledger before being reclaimed
+  persistEntry: (entry) => {
+    // publish to remote source, or save to disk...
+    appendToFile(JSON.stringify(entry));
+  },
 });
 
 async function processEmails(emails: Email) {
-	for (const email of emails) {
-		tracker.run(async () => await EmailService.process(email), {
-			name: "processEmail",
-		});
-	}
+  for (const email of emails) {
+    tracker.run(async () => await EmailService.process(email), {
+      name: "processEmail",
+    });
+  }
 }
 ```
 
@@ -138,11 +138,11 @@ const tracker = new TaskTracker();
 
 // Use human readable strings for tasks being run with a logger.
 function startTask(name: string) {
-	log(`start: ${name}`);
-	const { stop } = tracker.start();
-	return () => {
-		log(`stop: ${name} ${stop().toPrecision(2)}`);
-	};
+  log(`start: ${name}`);
+  const { stop } = tracker.start();
+  return () => {
+    log(`stop: ${name} ${stop().toPrecision(2)}`);
+  };
 }
 
 // now in use
