@@ -88,8 +88,8 @@ async function processEmails(emails: Email) {
 The above examples will generate a convenient log format:
 
 ```json
-{"data":"[3480484d-f468-4e08-b70f-e0bc009aacbd::processEmail] start","index":197,"timestamp":1644981910473}
-{"data":"[3480484d-f468-4e08-b70f-e0bc009aacbd::processEmail] start","index":198,"timestamp":1644981910480}
+{"data":"[069cf203-84f5-46fb-bbfd-a5af6a6b091f::processEmail] start","index":80,"timestamp":1654009598453}
+{"data":"[069cf203-84f5-46fb-bbfd-a5af6a6b091f::processEmail] stop: 8566.28190599999ms","index":81,"timestamp":1654009607019}
 ```
 
 These logs can also include the name of the `TaskRunner` if supplied:
@@ -109,8 +109,8 @@ const tracker = new TaskTracker({
 will generate:
 
 ```json
-{"data":"[<DataSvc>3480484d-f468-4e08-b70f-e0bc009aacbd::processEmail] start","index":197,"timestamp":1644981910473}
-{"data":"[<DataSvc>3480484d-f468-4e08-b70f-e0bc009aacbd::processEmail] start","index":198,"timestamp":1644981910480}
+{"data":"[<DataSvc>ae5fe69d-d59a-4fd7-a15f-9ca8f6c50ccc::processEmail] start","index":90,"timestamp":1654009624232}
+{"data":"[<DataSvc>ae5fe69d-d59a-4fd7-a15f-9ca8f6c50ccc::processEmail] stop: 6283.763211000012ms","index":91,"timestamp":1654009630516}
 ```
 
 > The [examples](https://github.com/ededejr/task-tracker/tree/feat/task-runner-ledger/examples) folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
