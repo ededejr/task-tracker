@@ -15,7 +15,7 @@ In your `.npmrc` file include the following:
 Afterwards, you can now install using `npm`:
 
 ```
-npm install @ededejr/task-runner
+npm install @ededejr/task-tracker
 ```
 
 ## Usage
