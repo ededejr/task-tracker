@@ -1,78 +1,80 @@
 {
-	"name": "@ededejr/task-tracker",
-	"version": "0.1.1",
-	"description": "A small utility for tracking task execution",
-	"main": "index.js",
-	"scripts": {
-		"build": "tsc",
-		"build:candidate": "tsc -p tsconfig.prod.json",
-		"copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
-		"lint": "prettier --write 'src/**/*.ts'",
-		"test": "jest",
-		"test:watch": "jest --watch",
-		"release": "release-it --ci",
-		"release:minor": "release-it --ci --minor",
-		"release:major": "release-it --ci --major"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/ededejr/task-tracker.git"
-	},
-	"keywords": [
-		"npm",
-		"package"
-	],
-	"author": "@ededejr",
-	"license": "LICENSE",
-	"bugs": {
-		"url": "https://github.com/ededejr/task-tracker/issues"
-	},
-	"homepage": "https://github.com/ededejr/task-tracker#readme",
-	"devDependencies": {
-		"@release-it/conventional-changelog": "^5.1.1",
-		"@types/jest": "^26.0.23",
-		"@types/node": "^18.11.17",
-		"@types/uuid": "^8.3.4",
-		"@typescript-eslint/eslint-plugin": "^5.46.1",
-		"@typescript-eslint/parser": "^5.46.1",
-		"eslint": "^8.25.0",
-		"jest": "^27.0.5",
-		"prettier": "^2.7.1",
-		"release-it": "^15.5.0",
-		"ts-jest": "^27.0.3",
-		"typescript": "^4.9.4"
-	},
-	"release-it": {
-		"git": {
-			"commit": true,
-			"commitMessage": "chore(release): release v${version}",
-			"changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
-			"tagAnnotation": "Release v${version}"
-		},
-		"npm": {
-			"publish": false,
-			"publishPath": "build"
-		},
-		"plugins": {
-			"@release-it/conventional-changelog": {
-				"preset": "angular",
-				"infile": "CHANGELOG.md"
-			}
-		},
-		"hooks": {
-			"before:init": [
-				"npm run lint",
-				"npm run test",
-				"npm run build:candidate"
-			],
-			"after:git:release": "npm run copy:meta",
-			"after:release": "npm publish ./build"
-		}
-	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
-	},
-	"dependencies": {
-		"uuid": "^9.0.0"
-	}
+  "name": "@ededejr/task-tracker",
+  "version": "0.1.1",
+  "description": "A small utility for tracking task execution",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:candidate": "tsc",
+    "copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
+    "lint": "prettier --write 'src/**/*.ts'",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "release": "release-it --ci",
+    "release:minor": "release-it --ci --minor",
+    "release:major": "release-it --ci --major"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ededejr/task-tracker.git"
+  },
+  "keywords": [
+    "npm",
+    "package"
+  ],
+  "author": "@ededejr",
+  "license": "LICENSE",
+  "bugs": {
+    "url": "https://github.com/ededejr/task-tracker/issues"
+  },
+  "homepage": "https://github.com/ededejr/task-tracker#readme",
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^5.1.1",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^18.11.17",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
+    "eslint": "^8.25.0",
+    "jest": "^27.0.5",
+    "prettier": "^2.7.1",
+    "release-it": "^15.5.0",
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.9.4"
+  },
+  "release-it": {
+    "git": {
+      "commit": true,
+      "commitMessage": "chore(release): release v${version}",
+      "changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
+      "tagAnnotation": "Release v${version}"
+    },
+    "npm": {
+      "publish": true,
+      "publishPath": "build"
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular",
+        "infile": "CHANGELOG.md"
+      }
+    },
+    "hooks": {
+      "before:init": [
+        "npm run lint",
+        "npm run test",
+        "npm run build"
+      ],
+      "after:release": [
+        "npm run copy:meta",
+        "npm publish ./build"
+      ]
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
 }
