@@ -7,9 +7,9 @@ export default class TaskTracker {
   private ledger: Ledger<string>;
   private isHistoryEnabled: boolean;
   private name?: string;
-  private log?: ITaskRunnerOptions["log"];
+  private log?: ITaskTrackerOptions["log"];
 
-  constructor(options?: ITaskRunnerOptions) {
+  constructor(options?: ITaskTrackerOptions) {
     this.name = options?.name;
     this.isHistoryEnabled = options?.isHistoryEnabled ?? true;
     this.ledger = new Ledger(options?.maxHistorySize || 50);
@@ -64,7 +64,7 @@ export default class TaskTracker {
    * Run and track a task during it's execution.
    *
    * Using this function will also keep a history of tasks
-   * that have been run by this `TaskRunner` instance. The
+   * that have been run by this `TaskTracker` instance. The
    * history can be retrieved using the `history` property.
    *
    * @param task The task you wish to execute and track.
@@ -104,12 +104,18 @@ export default class TaskTracker {
   }
 
   private record(id: string, message: string, taskName?: string) {
-    this.isHistoryEnabled &&
-      this.ledger.push(`[${this.formatTask(id, taskName)}] ${message}`);
+    const entry = {
+      id,
+      signature: this.formatTask(id, taskName),
+      tracker: this.name,
+      taskName,
+      message,
+    };
+    this.isHistoryEnabled && this.ledger.push(JSON.stringify(entry));
   }
 
   private formatTask(id: string, taskName?: string) {
-    return `<${this.name ? `${this.name}>` : ""}${id}::${
+    return `${this.name ? `${this.name}::` : ""}${id}::${
       taskName || "unknown"
     }`;
   }
@@ -119,9 +125,9 @@ export default class TaskTracker {
   }
 }
 
-export interface ITaskRunnerOptions {
+export interface ITaskTrackerOptions {
   /**
-   * Providing a name to a TaskRunner instance will include the
+   * Providing a name to a TaskTracker instance will include the
    * name in every ledger entry. This is useful for debugging
    * within specific domains.
    *
@@ -133,7 +139,7 @@ export interface ITaskRunnerOptions {
    */
   isHistoryEnabled?: boolean;
   /**
-   * The size of the TaskRunner's history. This determines the limit of entries
+   * The size of the TaskTracker's history. This determines the limit of entries
    * before memory is reclaimed.
    */
   maxHistorySize?: number;

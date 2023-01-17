@@ -4,17 +4,7 @@ A small utility for tracking task execution.
 
 ## Installation
 
-This is hosted using Github packages, which means you may have to include an `.npmrc` file.
-
-In your `.npmrc` file include the following:
-
-```
-@ededejr:registry=https://npm.pkg.github.com/ededejr
-```
-
-Afterwards, you can now install using `npm`:
-
-```
+```sh
 npm install @ededejr/task-tracker
 ```
 
@@ -22,7 +12,7 @@ npm install @ededejr/task-tracker
 
 ### `TaskTracker.run`
 
-The `run` method is the easiest and most consistent way to get started using the `TaskRunner`. It handles a bunch of functionality around running tasks, and utilizes best practices while providing an accessible API.
+The `run` method is the easiest and most consistent way to get started using the `TaskTracker`. It handles a bunch of functionality around running tasks, and utilizes best practices while providing an accessible API.
 
 Let's take a look at a basic example, which will run your task and print out some logs to the console:
 
@@ -40,7 +30,7 @@ async function downloadEmails() {
 
 #### Tracing
 
-Using the `run` method keeps a history of all events, which can be useful for tracing (this can be disabled). This history can be accessed with the `TaskRunner.history` property. In real world use cases it may be more practical to consume the history before items are deleted from memory. This process of deletion is called "reclaiming", and memory is reclaimed when the `maxHistorySize` is reached.
+Using the `run` method keeps a history of all events, which can be useful for tracing (this can be disabled). This history can be accessed with the `TaskTracker.history` property. In real world use cases it may be more practical to consume the history before items are deleted from memory. This process of deletion is called "reclaiming", and memory is reclaimed when the `maxHistorySize` is reached.
 
 The following is an example which allows persisting the history on reclaim:
 
@@ -88,18 +78,21 @@ async function processEmails(emails: Email) {
 The above examples will generate a convenient log format:
 
 ```json
-{"data":"[069cf203-84f5-46fb-bbfd-a5af6a6b091f::processEmail] start","index":80,"timestamp":1654009598453}
-{"data":"[069cf203-84f5-46fb-bbfd-a5af6a6b091f::processEmail] stop: 8566.28190599999ms","index":81,"timestamp":1654009607019}
+{
+  "data": "{\"id\":\"14ff19c0-0c87-4f9b-b5e9-8bb86c99fbc6\",\"signature\":\"14ff19c0-0c87-4f9b-b5e9-8bb86c99fbc6::processEmail\",\"taskName\":\"processEmail\",\"message\":\"stop: 1427.0206289999187ms\"}",
+  "index": 69,
+  "timestamp": 1673981172578
+}
 ```
 
-These logs can also include the name of the `TaskRunner` if supplied:
+These logs can also include the name of the `TaskTracker` if supplied:
 
 ```ts
 import TaskTracker from "@ededejr/task-tracker";
 
 const tracker = new TaskTracker({
-  name: "DataSvc",
-  maxHistorySize: 100,
+  name: "Renderer",
+  maxHistorySize: 1 00,
   persistEntry: (entry) => {
     appendToFile(JSON.stringify(entry));
   },
@@ -109,11 +102,14 @@ const tracker = new TaskTracker({
 will generate:
 
 ```json
-{"data":"[<DataSvc>ae5fe69d-d59a-4fd7-a15f-9ca8f6c50ccc::processEmail] start","index":90,"timestamp":1654009624232}
-{"data":"[<DataSvc>ae5fe69d-d59a-4fd7-a15f-9ca8f6c50ccc::processEmail] stop: 6283.763211000012ms","index":91,"timestamp":1654009630516}
+{
+  "data": "{\"id\":\"14ff19c0-0c87-4f9b-b5e9-8bb86c99fbc6\",\"signature\":\"Renderer::14ff19c0-0c87-4f9b-b5e9-8bb86c99fbc6::processEmail\",\"tracker\":\"Renderer\",\"taskName\":\"processEmail\",\"message\":\"stop: 1427.0206289999187ms\"}",
+  "index": 69,
+  "timestamp": 1673981172578
+}
 ```
 
-> The [examples](https://github.com/ededejr/task-tracker/tree/feat/task-runner-ledger/examples) folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
+> The [examples](https://github.com/ededejr/task-tracker/tree/feat/task-tracker-ledger/examples) folder contains a script which uses the `run` method to generate a log file using some of the concepts discussed here.
 
 ### Manually tracking tasks
 

@@ -171,7 +171,8 @@ describe("TaskTracker", () => {
       const tracker = new TaskTracker({ maxHistorySize: 10, name: "Monolith" });
       const testTask = () => new Promise((resolve) => setTimeout(resolve, 100));
       await tracker.run(testTask);
-      expect(JSON.stringify(tracker.history[0])).toContain("<Monolith>");
+      const entry = tracker.history[0];
+      expect(JSON.stringify(entry)).toContain("Monolith::");
     });
 
     test("entry includes metadata", async () => {
@@ -182,6 +183,62 @@ describe("TaskTracker", () => {
       expect(entry).toHaveProperty("index");
       expect(entry).toHaveProperty("timestamp");
       expect(entry).toHaveProperty("data");
+    });
+
+    describe("formats JSON entries", () => {
+      test("with tracker name", async () => {
+        const tracker = new TaskTracker({
+          maxHistorySize: 10,
+          name: "Monolith",
+        });
+        const testTask = () =>
+          new Promise((resolve) => setTimeout(resolve, 100));
+        await tracker.run(testTask);
+        const entry = tracker.history[0];
+        expect(entry).toHaveProperty("index");
+        expect(entry).toHaveProperty("timestamp");
+        expect(entry).toHaveProperty("data");
+
+        if (typeof entry !== "string") {
+          const data = entry.data;
+          expect(typeof data).toBe("string");
+          const parsed = JSON.parse(data);
+          expect(parsed).toHaveProperty("id");
+          expect(parsed).toHaveProperty("signature");
+          expect(parsed).toHaveProperty("tracker");
+          expect(parsed).toHaveProperty("taskName");
+          expect(parsed).toHaveProperty("message");
+
+          expect(parsed.signature).toContain(parsed.id);
+          expect(parsed.signature).toContain(parsed.tracker);
+          expect(parsed.signature).toContain(parsed.taskName);
+        }
+      });
+
+      test("without tracker name", async () => {
+        const tracker = new TaskTracker({ maxHistorySize: 10 });
+        const testTask = () =>
+          new Promise((resolve) => setTimeout(resolve, 100));
+        await tracker.run(testTask);
+        const entry = tracker.history[0];
+        expect(entry).toHaveProperty("index");
+        expect(entry).toHaveProperty("timestamp");
+        expect(entry).toHaveProperty("data");
+
+        if (typeof entry !== "string") {
+          const data = entry.data;
+          expect(typeof data).toBe("string");
+          const parsed = JSON.parse(data);
+          expect(parsed).toHaveProperty("id");
+          expect(parsed).toHaveProperty("signature");
+          expect(parsed).not.toHaveProperty("tracker");
+          expect(parsed).toHaveProperty("taskName");
+          expect(parsed).toHaveProperty("message");
+
+          expect(parsed.signature).toContain(parsed.id);
+          expect(parsed.signature).toContain(parsed.taskName);
+        }
+      });
     });
   });
 });
