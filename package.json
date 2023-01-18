@@ -49,7 +49,7 @@
       "tagAnnotation": "Release v${version}"
     },
     "npm": {
-      "publish": true,
+      "publish": false,
       "publishPath": "build"
     },
     "plugins": {
