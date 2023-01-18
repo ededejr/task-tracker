@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "build:candidate": "tsc",
     "copy:meta": "cp package.json build/package.json && cp README.md build/README.md && cp LICENSE build/LICENSE",
     "lint": "prettier --write 'src/**/*.ts'",
     "test": "jest",
