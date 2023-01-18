@@ -1,3 +1,13 @@
+
+
+# [0.2.0](https://github.com/ededejr/task-tracker/compare/0.1.1...0.2.0) (2023-01-18)
+
+
+### Features
+
+* convert log format to JSON ([0c62a39](https://github.com/ededejr/task-tracker/commit/0c62a39b4ffe89fab25da2ff39ca3ee9a287f3c5))
+* update api with more deterministic and type safe outputs ([37b8d7b](https://github.com/ededejr/task-tracker/commit/37b8d7b3d5102afe583f3987cd1f16ee75546967))
+
 ## [0.1.1](https://github.com/ededejr/task-tracker/compare/0.1.0...0.1.1) (2022-05-17)
 
 ### Bug Fixes
