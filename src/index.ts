@@ -1,13 +1,13 @@
-import { performance } from "perf_hooks";
-import Ledger, { LedgerRecord } from "./ledger";
-import { v4 } from "uuid";
+import { performance } from 'perf_hooks';
+import Ledger, { LedgerRecord } from './ledger';
+import { v4 } from 'uuid';
 
 export default class TaskTracker {
   private map: Map<string, number> = new Map();
-  private ledger: Ledger<string>;
+  private ledger: Ledger<ITaskRecord>;
   private isHistoryEnabled: boolean;
-  private name?: string;
-  private log?: ITaskTrackerOptions["log"];
+  private name: ITaskTrackerOptions['name'];
+  private log: ITaskTrackerOptions['log'];
 
   constructor(options?: ITaskTrackerOptions) {
     this.name = options?.name;
@@ -42,7 +42,7 @@ export default class TaskTracker {
 
     return {
       id: taskId,
-      stop: () => this.stop(taskId) as number,
+      stop: () => this.stop(taskId),
     };
   }
 
@@ -51,13 +51,15 @@ export default class TaskTracker {
    * @param taskId
    * @returns The time elapsed in milliseconds
    */
-  stop(taskId: string): number | void {
+  stop(taskId: string): number | null {
     if (this.map.has(taskId)) {
       const now = performance.now();
       const startTime = this.map.get(taskId) || 0;
       this.map.delete(taskId);
       return now - startTime;
     }
+
+    return null;
   }
 
   /**
@@ -80,7 +82,11 @@ export default class TaskTracker {
 
     const { id, stop } = this.start();
     log(`start: "${taskName}"`);
-    this.record(id, "start", taskName);
+    this.record({
+      id,
+      message: 'start',
+      taskName,
+    });
 
     let error;
     let result;
@@ -89,11 +95,22 @@ export default class TaskTracker {
       result = await task();
     } catch (err: any) {
       error = err;
-      this.record(id, `error: ${err.name} | ${err.message}`, taskName);
+      this.record({
+        id,
+        message: `error: ${err.name} | ${err.message}`,
+        taskName,
+      });
     } finally {
       const duration = stop();
-      log(`stop: "${taskName}" ${duration.toPrecision(2)}ms`);
-      this.record(id, `stop: ${duration}ms`, taskName);
+      if (duration) {
+        log(`stop: "${taskName}" ${duration.toPrecision(2)}ms`);
+        this.record({
+          id,
+          message: `stop: ${duration.toPrecision(2)}ms`,
+          taskName,
+          duration,
+        });
+      }
     }
 
     if (error) {
@@ -103,20 +120,21 @@ export default class TaskTracker {
     return result as T;
   }
 
-  private record(id: string, message: string, taskName?: string) {
-    const entry = {
-      id,
-      signature: this.formatTask(id, taskName),
-      tracker: this.name,
-      taskName,
-      message,
-    };
-    this.isHistoryEnabled && this.ledger.push(JSON.stringify(entry));
+  private record({ id, message, taskName, duration }: ITaskRecordParams) {
+    this.isHistoryEnabled &&
+      this.ledger.push({
+        id,
+        signature: this.formatTask(id, taskName),
+        tracker: this.name,
+        taskName,
+        message,
+        duration,
+      });
   }
 
   private formatTask(id: string, taskName?: string) {
-    return `${this.name ? `${this.name}::` : ""}${id}::${
-      taskName || "unknown"
+    return `${this.name ? `${this.name}::` : ''}${id}::${
+      taskName || 'unknown'
     }`;
   }
 
@@ -146,20 +164,36 @@ export interface ITaskTrackerOptions {
   /**
    * A function which receives the latest ledger entry.
    */
-  persistEntry?: (entry: LedgerRecord<string>) => void;
+  persistEntry?: (entry: LedgerRecord<ITaskRecord>) => void;
   /**
    * A function which receives the ledger entries being deleted.
    */
-  persistHistory?: (entries: LedgerRecord<string>[]) => void;
+  persistHistory?: (entries: LedgerRecord<ITaskRecord>[]) => void;
   /**
    * An optional logging function called to trace events
    */
   log?: (message: string) => void;
 }
 
+export interface ITaskRecord {
+  id: string;
+  signature: string;
+  tracker?: string;
+  taskName?: string;
+  message: string;
+  duration?: number;
+}
+
+interface ITaskRecordParams {
+  id: string;
+  message: string;
+  taskName?: string;
+  duration?: number;
+}
+
 export interface ITask {
   id: string;
-  stop(): number;
+  stop(): number | null;
 }
 
 export type TaskFunction<T = unknown> = () => Promise<T> | T;

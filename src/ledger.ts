@@ -20,10 +20,8 @@ export default class Ledger<T = string> {
    * Retrieve the current history, optionally transforming the output.
    * @param transform An optional transform function for each history item.
    */
-  getHistory<RT = T>(
-    transform?: (item: LedgerRecord<T>, index?: number) => RT
-  ): RT[] | LedgerRecord<T>[] {
-    return transform ? this.history.map(transform) : this.history;
+  getHistory(): LedgerRecord<T>[] {
+    return this.history;
   }
 
   /**
